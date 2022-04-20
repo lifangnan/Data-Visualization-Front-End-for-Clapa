@@ -7,7 +7,8 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+          <!-- <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar"> -->
+          <img src="../../icons/user_pic.gif" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
@@ -28,6 +29,8 @@
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+
+    <div id="clapaText" class="right-menu" style="width:120px" />
   </div>
 </template>
 
@@ -47,6 +50,9 @@ export default {
       'avatar'
     ])
   },
+  mounted() {
+    this.initclapatext()
+  },
   methods: {
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
@@ -54,6 +60,66 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+
+    initclapatext() {
+      const echarts = require('echarts/lib/echarts')
+      require('echarts/lib/component/graphic')
+
+      var chartDom = document.getElementById('clapaText')
+      var myChart = echarts.init(chartDom)
+      var option
+
+      option = {
+        graphic: {
+          elements: [
+            {
+              type: 'text',
+              left: 'center',
+              top: 'center',
+              style: {
+                text: 'CLAPA',
+                fontSize: 30,
+                fontWeight: 'bold',
+                lineDash: [0, 200],
+                lineDashOffset: 0,
+                fill: 'transparent',
+                stroke: '#000',
+                lineWidth: 1
+              },
+              keyframeAnimation: {
+                duration: 3000,
+                loop: true,
+                keyframes: [
+                  {
+                    percent: 0.7,
+                    style: {
+                      fill: 'transparent',
+                      lineDashOffset: 200,
+                      lineDash: [200, 0]
+                    }
+                  },
+                  {
+                    // Stop for a while.
+                    percent: 0.8,
+                    style: {
+                      fill: 'transparent'
+                    }
+                  },
+                  {
+                    percent: 1,
+                    style: {
+                      fill: 'black'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+
+      option && myChart.setOption(option)
     }
   }
 }
