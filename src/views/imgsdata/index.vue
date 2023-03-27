@@ -2,39 +2,57 @@
   <div class="imgsdataPage">
     <div class="selectdiv">
       <span class="simpletext">日期：</span>
-      <el-date-picker
+      <!-- <el-date-picker
         v-model="value_dates"
         type="dates"
         placeholder="选择一个或多个日期"
+        @change=""
+      /> -->
+      <el-date-picker
+        v-model="value_dates"
+        type="datetimerange"
+        :picker-options="pickerOptions"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        @change="DateChanged"
       />
 
-      <span class="simpletext">发次：</span>
-      <el-select v-model="value" filterable placeholder="请选择">
+      <span class="simpletext">相机设备：</span>
+      <el-select v-model="camera_value" filterable placeholder="请选择">
         <el-option
-          v-for="item in options"
+          v-for="item in camera_options"
           :key="item.value"
           :label="item.label"
           :value="item.value"
         />
       </el-select>
+
+      <span style="margin-left: 10px;">
+        <el-button type="primary" plain @click="Download_button1()">下载当前相机图片</el-button>
+      </span>
+
+      <!-- <span style="margin-left: 10px;">
+        <el-button type="primary" plain>打包下载所有图片</el-button>
+      </span> -->
     </div>
     <el-divider />
 
     <div>
       <el-row>
-        <el-col v-for="(o, index) in 250" :key="o" :span="6">
+        <el-col v-for="(o, index) in srcList.length" :key="o" :span="6">
           <el-card :body-style="{ padding: '0px' }">
             <el-image
               :key="fit"
               class="block"
               style="width: 100%; height: 100%; padding:5px"
-              :src="url"
+              :src="srcList[index]"
               :fit="'contain'"
               :preview-src-list="srcList"
               lazy
             />
             <div style="padding: 0px; text-align:center; margin-top:2px; margin-bottom:2px;">
-              {{ index }}.jpg
+              {{ filenames[index] }}
             </div>
           </el-card>
         </el-col>
@@ -46,34 +64,101 @@
 </template>
 
 <script>
+import { getFilenamesAndUrls } from '@/api/flask_api'
+import request from '@/utils/request'
+
 export default {
   name: 'Imgsdata',
   data() {
     return {
       value_dates: [],
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
+      pickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            picker.$emit('pick', [start, end])
+          }
+        }]
+      },
+
       value: '',
 
-      url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
+      camera_options: [{
+        value: 'andor1',
+        label: 'Andor'
+      }],
+      camera_value: '',
+
+      // url: require('@/icons/test_jpgs/1.jpg'),
+      filenames: [
+      ],
       srcList: [
-        'https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg',
-        'https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg'
       ]
+    }
+  },
+  watch: {
+    camera_value(newval, oldval) {
+      this.updateImgsList()
+    }
+  },
+  mounted() {
+    // this.updateImgsList()
+  },
+
+  methods: {
+    updateImgsList() {
+      var startTime = null
+      var endTime = null
+      if (this.value_dates) {
+        startTime = this.value_dates[0]
+        endTime = this.value_dates[1]
+      }
+
+      getFilenamesAndUrls(this.camera_value, startTime, endTime).then(res => {
+        if (res['data']) {
+          this.filenames = res['data']['filenames']
+          var mongnoDB_ids = res['data']['srcList']
+          for (var key in mongnoDB_ids) {
+            mongnoDB_ids[key] = request.defaults.baseURL + '/getOneImg' + mongnoDB_ids[key]
+            // console.log(mongnoDB_ids[key])
+          }
+          this.srcList = mongnoDB_ids
+        }
+      })
+    },
+
+    DateChanged() {
+      if (this.camera_value) {
+        this.updateImgsList()
+      }
+    },
+
+    Download_button1() {
+      if (this.camera_value) {
+        const a = document.createElement('a')
+        a.href = request.defaults.baseURL + '/downloadAllImages?cameraName=' + this.camera_value
+        a.target = '_blank'
+        a.click()
+      }
     }
   }
 }

@@ -6,7 +6,7 @@
           <el-header>
             <div class="block">
               <el-date-picker
-                v-model="value2"
+                v-model="value_dates"
                 type="datetimerange"
                 :picker-options="pickerOptions"
                 range-separator="至"
@@ -25,10 +25,10 @@
       <el-col :span="10" style="padding-top: 100px">
         <!-- <span> 选择需要展示的PV记录 </span> -->
         <div id="pv-select-col">
-          <CascadeSelector v-show="cas0_visible" :id="Cas0" />
-          <CascadeSelector v-show="cas1_visible" :id="Cas1" />
-          <CascadeSelector v-show="cas2_visible" :id="Cas2" />
-          <CascadeSelector v-show="cas3_visible" :id="Cas3" />
+          <CascadeSelector v-show="cas0_visible" :id="Cas0" ref="selector0" @PVChanged="pv0changed" />
+          <CascadeSelector v-show="cas1_visible" :id="Cas1" ref="selector1" @PVChanged="pv1changed" />
+          <CascadeSelector v-show="cas2_visible" :id="Cas2" ref="selector2" @PVChanged="pv2changed" />
+          <CascadeSelector v-show="cas3_visible" :id="Cas3" ref="selector3" @PVChanged="pv3changed" />
         </div>
       </el-col>
     </el-row>
@@ -46,6 +46,7 @@
 // import { mapGetters } from 'vuex'
 // import $ from 'jquery'
 import CascadeSelector from '@/components/cascadeSelector/index.vue'
+import { getArchiverData } from '@/api/flask_api'
 
 export default {
   name: 'MultilinePlot',
@@ -56,6 +57,9 @@ export default {
       value: '',
       setwidth: '800px',
       setheight: '600px',
+
+      PVNames: [null, null, null, null],
+
       pickerOptions: {
         shortcuts: [{
           text: '最近一周',
@@ -83,8 +87,7 @@ export default {
           }
         }]
       },
-      value1: [new Date(2000, 10, 10, 10, 10), new Date(2000, 10, 11, 10, 10)],
-      value2: '',
+      value_dates: [],
 
       cas0_visible: true,
       cas1_visible: false,
@@ -119,13 +122,12 @@ export default {
       var now = new Date(1997, 9, 3)
       const oneDay = 24 * 3600 * 1000
       var randval1 = 500
-      var randval2 = 500
       for (var i = 0; i < 1000; i++) {
         now = new Date(+now + oneDay)
         randval1 = randval1 + Math.random() * 21 - 10
-        randval2 = randval2 + Math.random() * 21 - 10
+        // randval2 = randval2 + Math.random() * 21 - 10
         data1.push({ name: now.toString(), value: [[now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'), Math.round(randomData(randval1))] })
-        data2.push({ name: now.toString(), value: [[now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'), Math.round(randomData(randval2))] })
+        // data2.push({ name: now.toString(), value: [[now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'), Math.round(randomData(randval2))] })
       }
 
       option = {
@@ -174,7 +176,7 @@ export default {
 
         ]
       }
-      myChart.setOption(option)
+      // myChart.setOption(option)
 
       option && myChart.setOption(option)
     },
@@ -200,7 +202,25 @@ export default {
       } else if (this.cas0_visible) {
         this.cas0_visible = false
       }
+    },
+
+    pv0changed(value) {
+      this.PVNames[0] = value
+      console.log(this.PVNames)
+    },
+    pv1changed(value) {
+      this.PVNames[1] = value
+      console.log(this.PVNames)
+    },
+    pv2changed(value) {
+      this.PVNames[2] = value
+      console.log(this.PVNames)
+    },
+    pv3changed(value) {
+      this.PVNames[3] = value
+      console.log(this.PVNames)
     }
+
   }
 }
 </script>

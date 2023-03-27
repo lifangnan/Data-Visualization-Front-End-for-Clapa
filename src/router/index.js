@@ -63,7 +63,7 @@ export const constantRoutes = [
         path: 'historydata',
         name: 'Historydata',
         component: () => import('@/views/historydata/index'),
-        meta: { title: '历史数据(Archiver)', icon: 'form' }
+        meta: { title: 'Archiver历史数据', icon: 'form' }
       }
     ]
   },
@@ -77,8 +77,8 @@ export const constantRoutes = [
       {
         path: 'tabledata',
         name: 'tabledata',
-        component: () => import('@/views/imgsdata/index'),
-        meta: { title: '表格数据', icon: 'table' }
+        component: () => import('@/views/tabledata/index'),
+        meta: { title: '表格数据(未上线)', icon: 'table' }
       },
       {
         path: 'imgsdata',

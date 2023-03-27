@@ -3,18 +3,18 @@
     <div class="pagetitle">运行状态</div>
     <el-row :gutter="10">
       <el-col :span="12"><div class="grid-content shadow">
-        <PvTimePlot :chart-id="'plot1'" />
+        <PvTimePlot :chart-id="'plot1'" :default-pv="'IT:PSQ1:GetCurrent'" />
       </div></el-col>
       <el-col :span="12"><div class="grid-content shadow">
-        <PvTimePlot :chart-id="'plot2'" />
+        <PvTimePlot :chart-id="'plot2'" :default-pv="'IT:PSQ2:GetCurrent'" />
       </div></el-col>
     </el-row>
     <el-row :gutter="10">
       <el-col :span="12"><div class="grid-content shadow">
-        <PvTimePlot :chart-id="'plot3'" />
+        <PvTimePlot :chart-id="'plot3'" :default-pv="'IT:PSQ3:GetCurrent'" />
       </div></el-col>
       <el-col :span="12"><div class="grid-content shadow">
-        <PvTimePlot :chart-id="'plot4'" />
+        <PvTimePlot :chart-id="'plot4'" :default-pv="'IT:PSQ4:GetCurrent'" />
       </div></el-col>
     </el-row>
   </div>

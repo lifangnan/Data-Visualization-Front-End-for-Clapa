@@ -1,14 +1,14 @@
 <template>
-  <div class="block" type="CascadeSelector">
-    <el-cascader
-      placeholder="选择需要展示的PV记录"
-      :options="options"
-      :props="{ multiple: false }"
-      collapse-tags
-      filterable
-      size="medium"
-    />
-  </div>
+  <el-cascader
+    v-model="cascaderSelected"
+    placeholder="选择需要展示的PV记录"
+    :options="options"
+    :props="{ multiple: false }"
+    collapse-tags
+    filterable
+    size="medium"
+    @change="PVSelectedChanged"
+  />
 </template>
 
 <script>
@@ -16,50 +16,56 @@ export default {
   name: 'CascadeSelector',
   data() {
     return {
+      cascaderSelected: [],
+      PVSelected: '',
       options: [{
-        value: 'vacuum',
-        label: '真空系统',
+        value: 'laser',
+        label: '激光系统',
         children: [{
-          value: 'vac-child1',
-          label: '子系统1',
-          children: [{
-            value: 'vac-pv1',
-            label: '真空PV1'
-          },
-          {
-            value: 'vac-pv2',
-            label: '真空PV2'
-          }]
-        }, {
-          value: 'vac-child2',
-          label: '子系统2'
-        }, {
-          value: 'vac-child3',
-          label: '子系统3'
+          value: 'Mshutterstate',
+          label: 'Mshutter'
         }]
       },
       {
         value: 'beamline',
         label: '束线段',
         children: [{
-          value: 'beamline-child1',
-          label: '束线段1',
-          children: [{
-            value: 'beamline-pv1',
-            label: '束线PV1'
-          },
-          {
-            value: 'beamline-pv2',
-            label: '束线PV2'
-          }]
-        }, {
-          value: 'beamline-child2',
-          label: '束线段2'
-        }, {
-          value: 'beamline-child3',
-          label: '束线段3'
+          value: 'IT:PSQ1:GetCurrent',
+          label: 'Q1电流'
+        },
+        {
+          value: 'IT:PSQ2:GetCurrent',
+          label: 'Q2电流'
+        },
+        {
+          value: 'IT:PSQ3:GetCurrent',
+          label: 'Q3电流'
+        },
+        {
+          value: 'IT:PSB1:GetCurrent',
+          label: '偏转磁铁电流'
+        },
+        {
+          value: 'IT:PSQ4:GetCurrent',
+          label: 'Q4电流'
+        },
+        {
+          value: 'IT:PSQ5:GetCurrent',
+          label: 'Q5电流'
         }]
       }]
+    }
+  },
+
+  watch: {
+    cascaderSelected(newval, oldval) {
+      this.PVSelected = newval[newval.length - 1]
+    }
+  },
+  methods: {
+    PVSelectedChanged() {
+      // console.log(this.PVSelected[this.PVSelected.length - 1])
+      this.$emit('PVChanged', this.PVSelected[this.PVSelected.length - 1])
     }
   }
 }

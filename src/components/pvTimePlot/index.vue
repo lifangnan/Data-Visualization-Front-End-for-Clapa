@@ -2,7 +2,7 @@
   <div class="pvTimePlot-container">
     <el-container ref="elcontrainer">
       <el-header>
-        <el-select v-model="value" filterable placeholder="Select">
+        <el-select v-model="selectPV" filterable placeholder="Select">
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -19,40 +19,52 @@
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
-// import elementResizeDetectorMaker from 'element-resize-detector'
+import { get48HoursData, getOneCurrentData } from '@/api/flask_api'
 
 export default {
   name: 'PvTimePlot',
   props: { chartId: { type: String, default: 'mychart' },
-    defaultPv: { type: String, default: '' },
+    defaultPv: { type: String, default: 'PV name1' },
     setwidth: { type: String, default: '560px' },
     setheight: { type: String, default: '320px' }},
   data() {
     return {
-      value: this.defaultPv,
+      selectPV: this.defaultPv,
+      selectPV_changed: false,
+      test_int: 0,
+      plotData: [],
       options: [
         {
-          value: 'Option1',
-          label: 'Option1'
+          value: 'NULL',
+          label: 'NULL'
         },
         {
-          value: 'Option2',
-          label: 'Option2'
+          value: 'IT:PSQ1:GetCurrent',
+          label: 'IT:PSQ1:GetCurrent'
         },
         {
-          value: 'Option3',
-          label: 'Option3'
+          value: 'IT:PSQ2:GetCurrent',
+          label: 'IT:PSQ2:GetCurrent'
         },
         {
-          value: 'Option4',
-          label: 'Option4'
+          value: 'IT:PSQ3:GetCurrent',
+          label: 'IT:PSQ3:GetCurrent'
         },
         {
-          value: 'Option5',
-          label: 'Option5'
+          value: 'IT:PSQ4:GetCurrent',
+          label: 'IT:PSQ4:GetCurrent'
+        },
+        {
+          value: 'IT:PSQ5:GetCurrent',
+          label: 'IT:PSQ5:GetCurrent'
         }
       ]
+    }
+  },
+
+  watch: {
+    selectPV(newPV, oldPV) {
+      this.getInitData()
     }
   },
   mounted() {
@@ -60,6 +72,13 @@ export default {
   },
 
   methods: {
+    getInitData() {
+      get48HoursData(this.selectPV).then(res => {
+        if (res['data']) {
+          this.plotData = res['data']
+        }
+      })
+    },
     echartsInit() {
       const echarts = require('echarts/lib/echarts')
       require('echarts/lib/component/title')
@@ -70,27 +89,14 @@ export default {
       var chartDom = document.getElementById(this.chartId)
       var myChart = echarts.init(chartDom)
       var option
-      function randomData() {
-        now = new Date(+now + oneDay)
-        value = value + Math.random() * 21 - 10
-        return {
-          name: now.toString(),
-          value: [
-            [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'),
-            Math.round(value)
-          ]
-        }
-      }
-      const data = []
-      let now = new Date(1997, 9, 3)
-      const oneDay = 24 * 3600 * 1000
-      let value = Math.random() * 1000
-      for (var i = 0; i < 1000; i++) {
-        data.push(randomData())
-      }
+
+      this.getInitData()
+      var accessable = true
+
+      // for test
       option = {
         title: {
-          text: 'Dynamic Data & Time Axis',
+          text: 'PV实时值',
           padding: 0,
           itemGap: 0,
           textStyle: {
@@ -101,15 +107,8 @@ export default {
           trigger: 'axis',
           formatter: function(params) {
             params = params[0]
-            var date = new Date(params.name)
             return (
-              date.getDate() +
-        '/' +
-        (date.getMonth() + 1) +
-        '/' +
-        date.getFullYear() +
-        ' : ' +
-        params.value[1]
+              params.name + ' : ' + params.value[1]
             )
           },
           axisPointer: {
@@ -134,7 +133,7 @@ export default {
             name: 'Fake Data',
             type: 'line',
             showSymbol: false,
-            data: data
+            data: this.plotData
           }
         ],
         grid: {
@@ -144,18 +143,40 @@ export default {
           y2: 30
         }
       }
-      setInterval(function() {
-        for (var i = 0; i < 5; i++) {
-          data.shift()
-          data.push(randomData())
-        }
-        myChart.setOption({
-          series: [
-            {
-              data: data
+      setInterval(() => {
+        if (accessable) {
+          getOneCurrentData(this.selectPV).then(res => {
+            // console.log(res.status)
+            // if (res['code'] !== 20000) {
+            //   accessable = false
+            //   myChart.setOption({ title: {
+            //     text: '连接PV失败',
+            //     padding: 0,
+            //     itemGap: 0,
+            //     textStyle: {
+            //       fontSize: 10,
+            //       color: '#FF0000'
+            //     }
+            //   }})
+            // }
+            const point = res['data']
+            if (point) {
+              if (this.plotData.length >= 60) {
+                this.plotData.shift()
+              }
+              this.plotData.push(point)
             }
-          ]
-        })
+          }).catch(e => {
+            console.log(e)
+          })
+          myChart.setOption({
+            series: [
+              {
+                data: this.plotData
+              }
+            ]
+          })
+        }
       }, 1000)
 
       option && myChart.setOption(option)

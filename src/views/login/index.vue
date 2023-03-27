@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">登陆</h3>
       </div>
 
       <el-form-item prop="username">
@@ -106,6 +106,10 @@ export default {
       })
     },
     handleLogin() {
+      // $.post('http://127.0.0.1:5055/user/login', function(data, status) {
+      //   alert('Data: ' + data + 'nStatus: ' + status)
+      // })
+
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true

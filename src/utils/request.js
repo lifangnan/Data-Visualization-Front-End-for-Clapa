@@ -6,14 +6,23 @@ import { getToken } from '@/utils/auth'
 // create an axios instance
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  withCredentials: true, // send cookies when cross-domain requests
+  // headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+  // transformRequest: function(data) { // 格式化请求数据
+  //   let ret = ''
+  //   for (var it in data) {
+  //     ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+  //   }
+  //   return ret
+  // },
+  timeout: 10000 // request timeout
 })
 
 // request interceptor
 service.interceptors.request.use(
   config => {
     // do something before request is sent
+    // config.headers['Access-Control-Allow-Origin'] = '*'
 
     if (store.getters.token) {
       // let each request carry token
