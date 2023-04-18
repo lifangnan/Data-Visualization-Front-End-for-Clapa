@@ -81,6 +81,12 @@ export const constantRoutes = [
         meta: { title: '表格数据(未上线)', icon: 'table' }
       },
       {
+        path: 'datasearch',
+        name: 'datasearch',
+        component: () => import('@/views/datasearch/index'),
+        meta: { title: '数据检索', icon: 'search' }
+      },
+      {
         path: 'imgsdata',
         name: 'imgsdata',
         component: () => import('@/views/imgsdata/index'),
